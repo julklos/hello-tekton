@@ -8,21 +8,8 @@ spec:
       description: The git repo
     - name: revision
       description: the branch for the git repo
-    - name: apikey
-      description: the ibmcloud api key
-    - name: registryNamespace
-      description: the ibmcloud registry namespace
-    - name: registryRegion
-      description: the ibmcloud registry region
-      default: us-south
-    - name: cluster
-      description: The IBM Cloud Kubernetes cluster name
-    - name: clusterRegion
-      description: The IBM Cloud Kubernetes cluster region
-      default: us-south
-    - name: clusterNamespace
-      description: The Kubernetes cluster namespace
-      default: prod
+    - name: url
+      description: PR's url
   resourcetemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim
@@ -51,18 +38,8 @@ spec:
           value: $(params.repository)
         - name: revision
           value: $(params.revision)
-        - name: apikey
-          value: $(params.apikey)
-        - name: registryNamespace
-          value: $(params.registryNamespace)
-        - name: registryRegion
-          value: $(params.registryRegion)
-        - name: cluster
-          value: $(params.cluster)
-        - name: clusterRegion
-          value: $(params.clusterRegion)
-        - name: clusterNamespace
-          value: $(params.clusterNamespace)
+        - name: url
+          value: $(params.url)
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
@@ -71,9 +48,17 @@ metadata:
 spec:
   params:
     - name: repository
-      value: "https://github.com/open-toolchain/hello-tekton"
+      value: "https://github.com/julklos/hello-tekton"
     - name: revision
       value: "master"
+    - name: url
+      value: "https://api.github.com/repos/julklos/hello-tekton/pulls/1"
+# spec:
+#   params:
+#   - name: source-repo
+#     value: $(body.pull_request.url)
+#   - name: sha
+#     value: $(body.head_commit.id)
 ---
 apiVersion: tekton.dev/v1beta1
 kind: EventListener
