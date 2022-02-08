@@ -52,7 +52,7 @@ spec:
     - name: revision
       value: "master"
     - name: url
-      value: "https://api.github.com/repos/julklos/hello-tekton/pulls/1"
+      value: $(body.pull_request.url)
 # spec:
 #   params:
 #   - name: source-repo
