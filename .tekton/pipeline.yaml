@@ -34,7 +34,7 @@ spec:
       workspaces:
       - name: task-pvc
         workspace: pipeline-pvc          
-    - name: call-resilient
+    - name: post-incident
       runAfter: [params-resilient-task]
       taskRef:
         name: curl
