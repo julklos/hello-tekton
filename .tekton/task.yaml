@@ -32,7 +32,7 @@ spec:
           value: $(params.SOAR_URL)
         - name: API_SECRET
           value: $(params.API_SECRET)
-      command: ["/bin/sh", "-c"]
+      command: ["/bin/bash", "-c"]
       args:
         - set -e -o pipefail;
           echo $PR_URL;
