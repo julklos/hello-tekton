@@ -34,16 +34,4 @@ spec:
       workspaces:
       - name: task-pvc
         workspace: pipeline-pvc          
-    # - name: post-incident
-    #   # runAfter: [call-resilient-task]
-    #   taskRef:
-    #     name: curl
-    #   params:
-    #     - name: url
-    #       value: $(params.SOAR_URL)
-    #     - name: options
-    #       value:
-    #         - "-basic -u $(params.API_SECRET)"
-    #   workspaces:
-    #   - name: task-pvc
-    #     workspace: pipeline-pvc  
+
