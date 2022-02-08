@@ -37,6 +37,7 @@ spec:
         - set -e -o pipefail;
           echo $PR_URL;
           echo $SOAR_URL;
+          curl https://www.google.com;
 
   # sidecars:
   #   - image: moby/buildkit:v0.8.1
