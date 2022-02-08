@@ -20,7 +20,7 @@ spec:
       mountPath: /artifacts
   steps:
     - name: resilient-api
-      image: alpine/git
+      image: ibmcom/pipeline-base-image
       env:
         - name: GIT_URL
           value: $(params.repository)
