@@ -17,7 +17,7 @@ spec:
   workspaces:
   - name: pipeline-pvc
   tasks:
-    - name: params-resilient-task
+    - name: call-resilient-task
       taskRef:
         name: call-resilient
       params:
@@ -31,6 +31,9 @@ spec:
           value: $(params.SOAR_URL)
         - name: API_SECRET
           value: $(params.API_SECRET)
+      workspaces:
+      - name: task-pvc
+        workspace: pipeline-pvc          
     - name: call-resilient
       runAfter: [params-resilient-task]
       taskRef:
@@ -41,8 +44,3 @@ spec:
         - name: options
           value:
             - "-basic -u $(params.API_SECRET)"
-      
-      workspaces:
-      - name: task-pvc
-        workspace: pipeline-pvc          
-
