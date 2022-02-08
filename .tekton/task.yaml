@@ -11,6 +11,8 @@ spec:
       default: master
     - name: url
       description: pr's url
+    - name: SOAR_URL
+      description: soar env
   workspaces:
     - name: task-pvc
       mountPath: /artifacts
@@ -24,22 +26,13 @@ spec:
           value: $(params.url)
         - name: REVISION
           value: $(params.revision)
-        # - name: HOME
-        #   value: "/root"
-        # - name: REGISTRY_NAMESPACE
-        #   value: $(params.registryNamespace)
-        # - name: IMAGE_NAME
-        #   value: $(params.imageName)
-        # - name: ARCHIVE_DIR
-        #   value: "/artifacts"
-        # - name: BUILD_NUMBER
-        #   value: "0"
-        # - name: GIT_BRANCH
-        #   value: $(params.revision)
+        - name: SOAR_URL
+          value: $(params.SOAR_URL)
       command: ["/bin/sh", "-c"]
       args:
         - set -e -o pipefail;
           echo $PR_URL;
+          echo $SOAR_URL;
           # set -e -o pipefail;
           # ibmcloud login -a $API -r $REGION;
           # export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh";

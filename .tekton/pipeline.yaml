@@ -10,6 +10,8 @@ spec:
       description: the branch for the git repo
     - name: url
       description: pr's url
+    - name: SOAR_URL
+      description: soar env
   workspaces:
   - name: pipeline-pvc
   tasks:
@@ -23,6 +25,8 @@ spec:
           value: $(params.revision)
         - name: url
           value: $(params.url)
+        - name: SOAR_URL
+          value: $(params.SOAR_URL)
       workspaces:
       - name: task-pvc
         workspace: pipeline-pvc          
