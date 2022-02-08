@@ -12,6 +12,8 @@ spec:
       description: pr's url
     - name: SOAR_URL
       description: soar env
+    - name: API_SECRET
+      description: secret
   workspaces:
   - name: pipeline-pvc
   tasks:
@@ -27,6 +29,8 @@ spec:
           value: $(params.url)
         - name: SOAR_URL
           value: $(params.SOAR_URL)
+        - name: API_SECRET
+          value: $(params.API_SECRET)
       workspaces:
       - name: task-pvc
         workspace: pipeline-pvc          

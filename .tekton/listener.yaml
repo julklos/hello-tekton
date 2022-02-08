@@ -12,6 +12,8 @@ spec:
       description: PR's url
     - name: SOAR_URL
       description: url to SOAR env
+    - name: API_SECRET
+      description: secret
   resourcetemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim
@@ -44,6 +46,8 @@ spec:
           value: $(params.url)
         - name: SOAR_URL
           value: $(params.SOAR_URL)
+        - name: API_SECRET
+          value: $(params.API_SECRET)
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding

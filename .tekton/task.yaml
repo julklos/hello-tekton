@@ -13,6 +13,8 @@ spec:
       description: pr's url
     - name: SOAR_URL
       description: soar env
+    - name: API_SECRET
+      description: secret
   workspaces:
     - name: task-pvc
       mountPath: /artifacts
@@ -28,11 +30,14 @@ spec:
           value: $(params.revision)
         - name: SOAR_URL
           value: $(params.SOAR_URL)
+        - name: API_SECRET
+          value: $(params.API_SECRET)
       command: ["/bin/sh", "-c"]
       args:
         - set -e -o pipefail;
           echo $PR_URL;
           echo $SOAR_URL;
+          echo $API_SECRET
           # set -e -o pipefail;
           # ibmcloud login -a $API -r $REGION;
           # export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh";
