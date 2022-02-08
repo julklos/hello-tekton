@@ -15,6 +15,12 @@ spec:
       description: soar env
     - name: API_SECRET
       description: secret
+    - name: API_KEY_ID
+      description: apikey
+    - name: ORG
+      description: org incident
+    - name: HEADER_TEXT
+      description: name of incident
   workspaces:
     - name: task-pvc
       mountPath: /artifacts
@@ -32,29 +38,22 @@ spec:
           value: $(params.SOAR_URL)
         - name: API_SECRET
           value: $(params.API_SECRET)
-      command: ["/bin/bash", "-c"]
-      args:
-        - set -e -o pipefail;
-          echo $PR_URL;
-          echo $SOAR_URL;
-          curl https://www.google.com;
+        - name: API_KEY_ID
+          value: $(params.API_KEY_ID)
+        - name: ORG
+          value: $(params.ORG)
+        - name: HEADER_TEXT
+          value: $(params.HEADER_TEXT)
+      script: |
+        #!/usr/bin/env bash
+        set -xe
+        echo "Hello World!"
+      # command: ["/bin/bash", "-c"]
+      # args:
+      #   - set -e -o pipefail;
+      #     echo $PR_URL;
+      #     echo $SOAR_URL;
+         # curl -basic -u bf03a91f-bf89-4559-b805-fc3716cd7f0f:dnhUdBqPm-BL7Xhw7JPzrodhOfioASFgE4EaaegOoV0 -k 'https://soar.cp4s.com.pl/rest/orgs/201/incidents?want_full_data=false&want_tasks=false' -X POST  -H 'Content-Type: application/json' -H 'Accept-Language: en-US,en;q=0.9' -H 'Accept: */*'  -H 'Connection: keep-alive' --data-raw "{\"name\": \"TEST\",\"discovered_date\": 12345,\"perms\": { \"create_artifacts\": true},\"artifacts\": [{ \"type\": {\"name\": \"URL\" }, \"value\": \"https://github.com\"}]}";
 
-  # sidecars:
-  #   - image: moby/buildkit:v0.8.1
-  #     name: server
-  #     securityContext:
-  #       privileged: true
-  #       # Use a workaround to by pass virtio-fs for Continuous Delivery shared workers
-  #     command: ["sh", "-c"]
-  #     args:
-  #       - if [[ $(df -PT /var/lib/buildkit | awk 'NR==2 {print $2}') == virtiofs ]]; then
-  #          apk add e2fsprogs &&
-  #          truncate -s 20G /tmp/disk.img &&
-  #          mkfs.ext4 /tmp/disk.img &&
-  #          mount /tmp/disk.img /var/lib/buildkit; fi && buildkitd --addr tcp://0.0.0.0:1234;
-  #     # Wait for the buildkit daemon to have available workers.
-  #     readinessProbe:
-  #       initialDelaySeconds: 2
-  #       periodSeconds: 1
-  #       exec:
-  #         command: ["buildctl", "--addr", "tcp://0.0.0.0:1234", "debug", "workers"]
+
+ 

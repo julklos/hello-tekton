@@ -14,6 +14,12 @@ spec:
       description: url to SOAR env
     - name: API_SECRET
       description: secret
+    - name: API_KEY_ID
+      description: apikey
+    - name: HEADER_TEXT
+      description: name of incident
+    - name: ORG
+      description: org name
   resourcetemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim
@@ -48,6 +54,12 @@ spec:
           value: $(params.SOAR_URL)
         - name: API_SECRET
           value: $(params.API_SECRET)
+        - name: API_KEY_ID
+          value: $(params.API_KEY_ID)
+        - name: ORG
+          value: $(params.ORG)
+        - name: HEADER_TEXT
+          value: $(params.HEADER_TEXT)
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
