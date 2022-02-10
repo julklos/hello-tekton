@@ -68,7 +68,7 @@ metadata:
 spec:
   params:
     - name: repository
-      value: "https://github.com/julklos/hello-tekton"
+      value: $(body.pull_request.html_url)
     - name: revision
       value: "master"
     - name: url
