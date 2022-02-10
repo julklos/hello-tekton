@@ -20,6 +20,14 @@ spec:
       description: text in incident
     - name: ORG
       description: org id
+    - name: compliance_change
+      description: compliance change repo's url
+    - name: evidence_repo
+      description: evidence repo's url
+    - name: incident_repo
+      description: incident repo's url
+    - name: inventory_repo
+      description: inventory repo's url
   workspaces:
   - name: pipeline-pvc
   tasks:
@@ -43,6 +51,14 @@ spec:
           value: $(params.ORG)
         - name: HEADER_TEXT
           value: $(params.HEADER_TEXT)
+        - name: compliance_change
+          value: $(params.compliance_change)
+        - name: evidence_repo
+          value: $(params.evidence_repo)
+        - name: incident_repo
+          value: $(params.incident_repo)
+        - name: inventory_repo
+          value: $(params.inventory_repo)
       workspaces:
       - name: task-pvc
         workspace: pipeline-pvc          

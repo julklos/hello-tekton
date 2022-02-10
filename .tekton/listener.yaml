@@ -20,6 +20,14 @@ spec:
       description: name of incident
     - name: ORG
       description: org name
+    - name: compliance_change
+      description: compliance change repo's url
+    - name: evidence_repo
+      description: evidence repo's url
+    - name: incident_repo
+      description: incident repo's url
+    - name: inventory_repo
+      description: inventory repo's url
   resourcetemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim
@@ -60,6 +68,15 @@ spec:
           value: $(params.ORG)
         - name: HEADER_TEXT
           value: $(params.HEADER_TEXT)
+        - name: compliance_change
+          value: $(params.compliance_change)
+        - name: evidence_repo
+          value: $(params.evidence_repo)
+        - name: incident_repo
+          value: $(params.incident_repo)
+        - name: inventory_repo
+          value: $(params.inventory_repo)
+
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
@@ -83,6 +100,14 @@ spec:
       value: $(params.ORG)
     - name: SOAR_URL
       value: $(params.SOAR_URL)
+    - name: compliance_change
+      value: $(params.compliance_change)
+    - name: evidence_repo
+      value: $(params.evidence_repo)
+    - name: incident_repo
+      value: $(params.incident_repo)
+    - name: inventory_repo
+      value: $(params.inventory_repo)
 # spec:
 #   params:
 #   - name: source-repo

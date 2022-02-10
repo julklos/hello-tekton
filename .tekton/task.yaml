@@ -21,6 +21,14 @@ spec:
       description: org incident
     - name: HEADER_TEXT
       description: name of incident
+    - name: compliance_change
+      description: compliance change repo's url
+    - name: evidence_repo
+      description: evidence repo's url
+    - name: incident_repo
+      description: incident repo's url
+    - name: inventory_repo
+      description: inventory repo's url
   workspaces:
     - name: task-pvc
       mountPath: /artifacts
@@ -44,12 +52,20 @@ spec:
           value: $(params.ORG)
         - name: HEADER_TEXT
           value: $(params.HEADER_TEXT)
+        - name: compliance_change
+          value: $(params.compliance_change)
+        - name: evidence_repo
+          value: $(params.evidence_repo)
+        - name: incident_repo
+          value: $(params.incident_repo)
+        - name: inventory_repo
+          value: $(params.inventory_repo)
       script: |
         #!/usr/bin/env bash
         set -xe
         echo $PR_URL
         echo $SOAR_URL
-        curl -basic -u $API_KEY_ID:$API_SECRET -k "${SOAR_URL}/rest/orgs/${ORG}/incidents?want_full_data=false&want_tasks=false" -X POST  -H 'Content-Type: application/json' -H 'Accept-Language: en-US,en;q=0.9' -H 'Accept: */*'  -H 'Connection: keep-alive' --data-raw "{\"name\": \"${HEADER_TEXT}\",\"discovered_date\": $(date +%s000),\"description\":{\"format\":\"html\",\"content\": \"<a href='${GIT_URL}' >${GIT_URL}</a>\"},\"perms\": { \"create_artifacts\": true},\"artifacts\": [{ \"type\": {\"name\": \"URL\" }, \"value\": \"${GIT_URL}\"}]}"
+        curl -basic -u $API_KEY_ID:$API_SECRET -k "${SOAR_URL}/rest/orgs/${ORG}/incidents?want_full_data=false&want_tasks=false" -X POST  -H 'Content-Type: application/json' -H 'Accept-Language: en-US,en;q=0.9' -H 'Accept: */*'  -H 'Connection: keep-alive' --data-raw "{\"name\": \"${HEADER_TEXT}\",\"discovered_date\": $(date +%s000),\"description\":{\"format\":\"html\",\"content\": \"<a href='${GIT_URL}' >GITHUB PULL REQUEST</a><a href='${compliance_change}' >COMPLIANCE CHANGE</a><a href='${evidence_repo}' >EVIDENCE REPO</a><a href='${incident_repo}' >INCIDENT REPO</a><a href='${inventory_repo}' >INVENTORY REPO</a>\"},\"perms\": { \"create_artifacts\": true},\"artifacts\": [{ \"type\": {\"name\": \"URL\" }, \"value\": \"${GIT_URL}\"}, { \"type\": {\"name\": \"URL\" }, \"value\": \"${compliance_change}\"}, { \"type\": {\"name\": \"URL\" }, \"value\": \"${evidence_repo}\"}, { \"type\": {\"name\": \"URL\" }, \"value\": \"${incident_repo}\"}, { \"type\": {\"name\": \"URL\" }, \"value\": \"${inventory_repo}\"}]}"
 
       # command: ["/bin/bash", "-c"]
       # args:
