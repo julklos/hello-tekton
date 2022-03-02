@@ -8,21 +8,26 @@ spec:
       description: The git repo
     - name: revision
       description: the branch for the git repo
-    - name: apikey
-      description: the ibmcloud api key
-    - name: registryNamespace
-      description: the ibmcloud registry namespace
-    - name: registryRegion
-      description: the ibmcloud registry region
-      default: us-south
-    - name: cluster
-      description: The IBM Cloud Kubernetes cluster name
-    - name: clusterRegion
-      description: The IBM Cloud Kubernetes cluster region
-      default: us-south
-    - name: clusterNamespace
-      description: The Kubernetes cluster namespace
-      default: prod
+    - name: url
+      description: PR's url
+    - name: SOAR_URL
+      description: url to SOAR env
+    - name: API_SECRET
+      description: secret
+    - name: API_KEY_ID
+      description: apikey
+    - name: HEADER_TEXT
+      description: name of incident
+    - name: ORG
+      description: org name
+    - name: compliance_change
+      description: compliance change repo's url
+    - name: evidence_repo
+      description: evidence repo's url
+    - name: incident_repo
+      description: incident repo's url
+    - name: inventory_repo
+      description: inventory repo's url
   resourcetemplates:
     - apiVersion: v1
       kind: PersistentVolumeClaim
@@ -51,18 +56,27 @@ spec:
           value: $(params.repository)
         - name: revision
           value: $(params.revision)
-        - name: apikey
-          value: $(params.apikey)
-        - name: registryNamespace
-          value: $(params.registryNamespace)
-        - name: registryRegion
-          value: $(params.registryRegion)
-        - name: cluster
-          value: $(params.cluster)
-        - name: clusterRegion
-          value: $(params.clusterRegion)
-        - name: clusterNamespace
-          value: $(params.clusterNamespace)
+        - name: url
+          value: $(params.url)
+        - name: SOAR_URL
+          value: $(params.SOAR_URL)
+        - name: API_SECRET
+          value: $(params.API_SECRET)
+        - name: API_KEY_ID
+          value: $(params.API_KEY_ID)
+        - name: ORG
+          value: $(params.ORG)
+        - name: HEADER_TEXT
+          value: $(params.HEADER_TEXT)
+        - name: compliance_change
+          value: $(params.compliance_change)
+        - name: evidence_repo
+          value: $(params.evidence_repo)
+        - name: incident_repo
+          value: $(params.incident_repo)
+        - name: inventory_repo
+          value: $(params.inventory_repo)
+
 ---
 apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
@@ -71,9 +85,35 @@ metadata:
 spec:
   params:
     - name: repository
-      value: "https://github.com/open-toolchain/hello-tekton"
+      value: $(body.pull_request.html_url)
     - name: revision
       value: "master"
+    - name: url
+      value: $(body.pull_request.url)
+    - name: API_KEY_ID
+      value: $(params.API_KEY_ID)
+    - name: API_SECRET
+      value: $(params.API_SECRET)
+    - name: HEADER_TEXT
+      value: $(params.HEADER_TEXT)
+    - name: ORG
+      value: $(params.ORG)
+    - name: SOAR_URL
+      value: $(params.SOAR_URL)
+    - name: compliance_change
+      value: $(params.compliance_change)
+    - name: evidence_repo
+      value: $(params.evidence_repo)
+    - name: incident_repo
+      value: $(params.incident_repo)
+    - name: inventory_repo
+      value: $(params.inventory_repo)
+# spec:
+#   params:
+#   - name: source-repo
+#     value: $(body.pull_request.url)
+#   - name: sha
+#     value: $(body.head_commit.id)
 ---
 apiVersion: tekton.dev/v1beta1
 kind: EventListener

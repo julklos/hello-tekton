@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: build-task
+  name: call-resilient
 spec:
   params:
     - name: repository
@@ -9,231 +9,70 @@ spec:
     - name: revision
       description: the revision
       default: master
-    - name: apikey
-      description: the ibmcloud api key
-    - name: api
-      description: the ibmcloud api endpoint
-      default: "https://cloud.ibm.com"
-    - name: registryNamespace
-      description: the ibmcloud registry namespace
-    - name: imageName
-      description: the base image name
-      default: "hello-containers-tekton"
-    - name: registryRegion
-      description: the ibmcloud registry region
+    - name: url
+      description: pr's url
+    - name: SOAR_URL
+      description: soar env
+    - name: API_SECRET
+      description: secret
+    - name: API_KEY_ID
+      description: apikey
+    - name: ORG
+      description: org incident
+    - name: HEADER_TEXT
+      description: name of incident
+    - name: compliance_change
+      description: compliance change repo's url
+    - name: evidence_repo
+      description: evidence repo's url
+    - name: incident_repo
+      description: incident repo's url
+    - name: inventory_repo
+      description: inventory repo's url
   workspaces:
-  - name: task-pvc
-    mountPath: /artifacts   
+    - name: task-pvc
+      mountPath: /artifacts
   steps:
-    - name: clone-repo
-      image: alpine/git
+    - name: resilient-api
+      image: ibmcom/pipeline-base-image
       env:
-        - name: REPOSITORY
+        - name: GIT_URL
           value: $(params.repository)
+        - name: PR_URL
+          value: $(params.url)
         - name: REVISION
           value: $(params.revision)
-      command: ["/bin/sh", "-c"]
-      args:
-        - set -e -o pipefail;
-          echo "Cloning $REPOSITORY";
-          cd /workspace && git clone -q -b $REVISION $REPOSITORY .;
-    - name: pre-build-check
-      image: ibmcom/pipeline-base-image
-      env:
-        - name: IBMCLOUD_API_KEY
-          value: $(params.apikey)
-        - name: API
-          value: $(params.api)
-        - name: REGION
-          value: $(params.registryRegion)
-        - name: HOME
-          value: "/root"
-        - name: REGISTRY_NAMESPACE
-          value: $(params.registryNamespace)
-        - name: IMAGE_NAME
-          value: $(params.imageName)
-      command: ["/bin/bash", "-c"]
-      args:
-        - set -e -o pipefail;
-          ibmcloud login -a $API -r $REGION;
-          export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh";
-          cd /workspace && source pre-build-check.sh;
-    - name: build-docker-image
-      image: ibmcom/pipeline-base-image
-      env:
-        - name: IBMCLOUD_API_KEY
-          value: $(params.apikey)
-        - name: API
-          value: $(params.api)
-        - name: REGION
-          value: $(params.registryRegion)
-        - name: HOME
-          value: "/root"
-        - name: REGISTRY_NAMESPACE
-          value: $(params.registryNamespace)
-        - name: IMAGE_NAME
-          value: $(params.imageName)
-        - name: ARCHIVE_DIR
-          value: "/artifacts"
-        - name: BUILD_NUMBER
-          value: "0"
-        - name: GIT_BRANCH
-          value: $(params.revision)
-      command: ["/bin/bash", "-c"]
-      args:
-        - set -e -o pipefail;
-          ibmcloud login -a $API -r $REGION;
-          export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh";
-          export GIT_COMMIT=$(git rev-parse HEAD);
-          export REGISTRY_URL=$(ibmcloud cr info | sed "2q;d" | awk '{for(i=1;i<=NF;i++) if ($i=="Registry") print $(i+1)}');
-          cd /workspace && source build-docker-image.sh;
----
-apiVersion: tekton.dev/v1beta1
-kind: Task
-metadata:
-  name: validate-task
-spec:
-  params:
-    - name: repository
-      description: the git repo
-    - name: revision
-      description: the revision
-      default: master
-    - name: apikey
-      description: the ibmcloud api key
-    - name: api
-      description: the ibmcloud api endpoint
-      default: "https://cloud.ibm.com"
-    - name: registryRegion
-      description: the ibmcloud registry region   
-  workspaces:
-  - name: task-pvc
-    mountPath: /artifacts         
-  steps:
-    - name: clone-repo
-      image: alpine/git
-      env:
-        - name: REPOSITORY
-          value: $(params.repository)
-        - name: REVISION
-          value: $(params.revision)
-      command: ["/bin/sh", "-c"]
-      args:
-        - set -e -o pipefail;
-          echo "Cloning $REPOSITORY";
-          cd /workspace && git clone -q -b $REVISION $REPOSITORY .;
-    - name: check-vulnerabilities
-      image: ibmcom/pipeline-base-image
-      env:
-        - name: IBMCLOUD_API_KEY
-          value: $(params.apikey)
-        - name: API
-          value: $(params.api)
-        - name: HOME
-          value: "/root"
-        - name: REGION
-          value: $(params.registryRegion)
-      command: ["/bin/bash", "-c"]
-      args:
-        - set -e -o pipefail;
-          ibmcloud login -a $API -r $REGION;
-          while read line; do export $line; done < /artifacts/build.properties;
-          cp /artifacts/build.properties .;
-          cd /workspace && source check-vulnerabilities.sh || true;
----
-apiVersion: tekton.dev/v1beta1
-kind: Task
-metadata:
-  name: deploy-task
-spec:
-  params:
-    - name: repository
-      description: the git repo
-    - name: revision
-      description: the revision
-      default: master
-    - name: apikey
-      description: the ibmcloud api key
-    - name: api
-      description: the ibmcloud api endpoint
-      default: "https://cloud.ibm.com"
-    - name: deployment-file
-      default: deployment.yml
-    - name: clusterNamespace
-      default: prod
-    - name: cluster
-      description: The IBM Cloud Kubernetes cluster name
-    - name: clusterRegion
-      description: The IBM Cloud Kubernetes cluster region
-  workspaces:
-  - name: task-pvc
-    mountPath: /artifacts  
-  steps:
-    - name: clone-repo
-      image: alpine/git
-      env:
-        - name: REPOSITORY
-          value: $(params.repository)
-        - name: REVISION
-          value: $(params.revision)
-      command: ["/bin/sh", "-c"]
-      args:
-        - set -e -o pipefail;
-          echo "Cloning $REPOSITORY";
-          cd /workspace && git clone -q -b $REVISION $REPOSITORY .;
-    - name: pre-deploy-check
-      image: ibmcom/pipeline-base-image
-      env:
-        - name: IBMCLOUD_API_KEY
-          value: $(params.apikey)
-        - name: API
-          value: $(params.api)
-        - name: REGION
-          value: $(params.clusterRegion)
-        - name: HOME
-          value: "/root"
-        - name: DEPLOYMENT_FILE
-          value: $(params.deployment-file)
-        - name: CLUSTER_NAMESPACE
-          value: $(params.clusterNamespace)
-        - name: PIPELINE_KUBERNETES_CLUSTER_NAME
-          value: $(params.cluster)
-      command: ["/bin/bash", "-c"]
-      args:
-        - set -e -o pipefail;
-          ibmcloud login -a $API -r $REGION;
-          cd /workspace;
-          export IKS_BETA_VERSION=1;
-          ibmcloud ks cluster config -c "${PIPELINE_KUBERNETES_CLUSTER_NAME}";
-          if which oc > /dev/null && ibmcloud ks cluster get -c "${PIPELINE_KUBERNETES_CLUSTER_NAME}" --json | jq -e '.type=="openshift"' > /dev/null; then oc login -u apikey -p "${IBMCLOUD_API_KEY}" ; fi;
-          while read line; do export $line; done < /artifacts/build.properties;
-          cp /artifacts/build.properties .;
-          cd /workspace && source pre-deploy-check.sh;
-    - name: deploy-to-kubernetes
-      image: ibmcom/pipeline-base-image
-      env:
-        - name: IBMCLOUD_API_KEY
-          value: $(params.apikey)
-        - name: API
-          value: $(params.api)
-        - name: REGION
-          value: $(params.clusterRegion)
-        - name: HOME
-          value: "/root"
-        - name: DEPLOYMENT_FILE
-          value: $(params.deployment-file)
-        - name: CLUSTER_NAMESPACE
-          value: $(params.clusterNamespace)
-        - name: PIPELINE_KUBERNETES_CLUSTER_NAME
-          value: $(params.cluster)
-      command: ["/bin/bash", "-c"]
-      args:
-        - set -e -o pipefail;
-          ibmcloud login -a $API -r $REGION;
-          export IKS_BETA_VERSION=1;
-          ibmcloud ks cluster config -c "${PIPELINE_KUBERNETES_CLUSTER_NAME}";
-          if which oc > /dev/null && ibmcloud ks cluster get -c "${PIPELINE_KUBERNETES_CLUSTER_NAME}" --json | jq -e '.type=="openshift"' > /dev/null; then oc login -u apikey -p "${IBMCLOUD_API_KEY}" ; fi;
-          while read line; do export $line; done < /artifacts/build.properties;
-          cp /artifacts/build.properties .;
-          cd /workspace && source deploy-to-kubernetes.sh;
-      
+        - name: SOAR_URL
+          value: $(params.SOAR_URL)
+        - name: API_SECRET
+          value: $(params.API_SECRET)
+        - name: API_KEY_ID
+          value: $(params.API_KEY_ID)
+        - name: ORG
+          value: $(params.ORG)
+        - name: HEADER_TEXT
+          value: $(params.HEADER_TEXT)
+        - name: compliance_change
+          value: $(params.compliance_change)
+        - name: evidence_repo
+          value: $(params.evidence_repo)
+        - name: incident_repo
+          value: $(params.incident_repo)
+        - name: inventory_repo
+          value: $(params.inventory_repo)
+      script: |
+        #!/usr/bin/env bash
+        set -xe
+        echo $PR_URL
+        echo $SOAR_URL
+        curl -basic -u $API_KEY_ID:$API_SECRET -k "${SOAR_URL}/rest/orgs/${ORG}/incidents?want_full_data=false&want_tasks=false" -X POST  -H 'Content-Type: application/json' -H 'Accept-Language: en-US,en;q=0.9' -H 'Accept: */*'  -H 'Connection: keep-alive' --data-raw "{\"name\": \"${HEADER_TEXT}\",\"discovered_date\": $(date +%s000),\"description\":{\"format\":\"html\",  \"content\": \"<div><a href='${PR_URL}' >API PULL REQUEST</a></div><div><a href='${GIT_URL}' >GITHUB PULL REQUEST</a></div><div><a href='${compliance_change}' >COMPLIANCE CHANGE</a></div><div><a href='${evidence_repo}' >EVIDENCE REPO</a></div><div><a href='${incident_repo}' >INCIDENT REPO</a></div><div><a href='${inventory_repo}' >INVENTORY REPO</a></div>\"},\"perms\": { \"create_artifacts\": true},\"artifacts\": [{ \"type\": {\"name\": \"URL\" }, \"value\": \"${GIT_URL}\"}, { \"type\": {\"name\": \"URL\" }, \"value\": \"${compliance_change}\"}, { \"type\": {\"name\": \"URL\" }, \"value\": \"${evidence_repo}\"}, { \"type\": {\"name\": \"URL\" }, \"value\": \"${incident_repo}\"}, { \"type\": {\"name\": \"URL\" }, \"value\": \"${inventory_repo}\"}]}"
+
+      # command: ["/bin/bash", "-c"]
+      # args:
+      #   - set -e -o pipefail;
+      #     echo $PR_URL;
+      #     echo $SOAR_URL;
+         # curl -basic -u bf03a91f-bf89-4559-b805-fc3716cd7f0f:dnhUdBqPm-BL7Xhw7JPzrodhOfioASFgE4EaaegOoV0 -k 'https://soar.cp4s.com.pl/rest/orgs/201/incidents?want_full_data=false&want_tasks=false' -X POST  -H 'Content-Type: application/json' -H 'Accept-Language: en-US,en;q=0.9' -H 'Accept: */*'  -H 'Connection: keep-alive' --data-raw "{\"name\": \"TEST\",\"discovered_date\": 12345,\"perms\": { \"create_artifacts\": true},\"artifacts\": [{ \"type\": {\"name\": \"URL\" }, \"value\": \"https://github.com\"}]}";
+
+
+ 
